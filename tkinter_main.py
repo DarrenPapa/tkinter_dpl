@@ -26,16 +26,14 @@ def tk_button(_, __, root, text="Button", command=None):
 	return tk.Button(root, text=text, command=command),
 
 @add_func(frame=temp)
-def tk_pack(_, __, obj, *args, **kwargs):
-	obj.pack(*args, **kwargs)
-
-@add_func(frame=temp)
-def tk_config(_, __, obj, *args, **kwargs):
-	obj.config(*args, **kwargs)
-
-@add_func(frame=temp)
 def tk_grid(_, __, obj, *args, **kwargs):
 	obj.grid(*args, **kwargs)
+
+@add_func(frame=temp)
+def tk_call_method(_, __, obj, method, *args, **kwargs):
+	if not hasattr(obj, method):
+		return f"err:{error.RUNTIME_ERROR}:Object {obj} does not have method {method!r}!"
+	return getattr(obj, method)(*args, **kwargs),
 
 @add_func(frame=temp)
 def tk_mainloop(_, __, tk_window):

@@ -1,20 +1,30 @@
 import "tkinter_main.py" "@loc"
 import "to_callable.py"
+import "to_dicts.py"
 import "text_io.py"
 
 pycatch [app] _mods.py.tkinter.tk_window "My tkinter app using DPL!" "350x200"
 
 # This turns any dpl code into runnable python functions!
-body _mods.py.to_callable button_function []
-    _mods.py.io println Yey
+body _mods.py.to_callable event_function [event]
+    # get the nested dict repr to be able to access the attrs
+    if-then (%event == nil)
+        _mods.py.io println "Button!"
+    else
+        pycatch [event] _mods.py.to_dicts %event
+        # print stuff :DD
+        _mods.py.io println %event.char
+    end
     _mods.py.io flush
 end
 
+_mods.py.tkinter.tk_call_method %app "bind" "<KeyPress>" %event_function
+
 pycatch [my_label] _mods.py.tkinter.tk_label %app "This is a test label!"
-_mods.py.tkinter.tk_pack %my_label
+_mods.py.tkinter.tk_call_method %my_label "pack"
 
 # Make a button that can be clicked!
-pycatch [my_button] _mods.py.tkinter.tk_button %app "Click me!" %button_function
-_mods.py.tkinter.tk_pack %my_button
+pycatch [my_button] _mods.py.tkinter.tk_button %app "Click me!" %event_function
+_mods.py.tkinter.tk_call_method %my_button "pack"
 
 _mods.py.tkinter.tk_mainloop %app
