@@ -12,15 +12,15 @@
 - Packing
 - Grid packing
 - Method calling
+- Text
+- Toplevel windows
+- Event (binding)
 
 ## Features to be implemented
 
-- Text
-- Event
 - File dialog
 - Message box
 - Simple dialog
-- Toplevel windows
 
 ## Goals
 

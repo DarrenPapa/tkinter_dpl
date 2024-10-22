@@ -4,29 +4,74 @@ import "tkinter_main.py" "@loc"
 import "to_callable.py"
 import "to_dicts.py"
 import "text_io.py"
+import "dicts.py"
 
-pycatch [app] _mods.py.tkinter.tk_window "My tkinter windows using DPL!" "350x200"
 
-# This turns any dpl code into runnable python functions!
-body _mods.py.to_callable event_function [event]
-    # get the nested dict repr to be able to access the attrs
-    if-then (%event == nil)
-        _mods.py.io println "Button!"
-    else
-        pycatch [event] _mods.py.to_dicts %event
-        # print stuff :DD
-        _mods.py.io println %event.char
-    end
-    _mods.py.io flush
+# Setup windows
+object WINDOW_ARGS
+body _mods.py.dict :WINDOW_ARGS
+    .def "[KWARGS]"
+    title = "This"
 end
 
-_mods.py.tkinter.tk_call_method %app "bind" "<KeyPress>" %event_function
+object WINDOW_CONFIG
+body _mods.py.dict :WINDOW_CONFIG
+    .def "[KWARGS]"
+    bg = grey
+end
 
-pycatch [my_label] _mods.py.tkinter.tk_label %app "This is a test label!\nType any thing except for tabs"
-_mods.py.tkinter.tk_call_method %my_label "pack"
+pycatch [app_config app] _mods.py.tkinter.tk_window :WINDOW_ARGS
+app_config :WINDOW_CONFIG
+_mods.py.tkinter.tk_call_method :app "geometry" "250x200"
 
-# Make a button that can be clicked!
-pycatch [my_button] _mods.py.tkinter.tk_button %app "Click me!" %event_function
-_mods.py.tkinter.tk_call_method %my_button "pack"
+# Set up the entry and label
+
+## Set up the label so it has a grey background
+object LABEL_CONFIG
+body _mods.py.dict :LABEL_CONFIG
+    .def "[KWARGS]"
+    text = "Enter some text!\n"
+    bg = grey
+    .let name{[PARGS]} = [:app]
+end
+pycatch [label] _mods.py.tkinter.tk_label :LABEL_CONFIG
+_mods.py.tkinter.tk_pack :label
+
+## Label setup
+pycatch [my_entry] _mods.py.tkinter.tk_entry :app
+_mods.py.tkinter.tk_pack :my_entry
+## Make the cursor focus on the entry
+_mods.py.tkinter.tk_call_method :my_entry "focus_set"
+
+## Define keyword arguments
+object external
+body _mods.py.dict :external
+    .def "[KWARGS]"
+    my_entry = :my_entry
+end
+
+object ENTRY
+body _mods.py.dict :ENTRY
+    .def "[KWARGS]"
+    name = ENTRY_CMD
+    external = :external
+end
+
+## Make a python callable DPL function
+
+body _mods.py.to_callable :ENTRY
+    pycatch [text] _mods.py.tkinter.tk_call_method :my_entry "get"
+    ### Print "You entered: < [text] >!" to the terminal
+    _mods.py.io raw_println "You entered: <" :text ">!"
+    _mods.py.io flush
+    _mods.py.tkinter.tk_call_method :my_entry "delete" :_mods.py.tkinter.start_text :_mods.py.tkinter.end
+end
+
+# Bind
+
+## Bind the callable function defined above to the return key
+_mods.py.tkinter.tk_call_method :app "bind" "<Return>" :ENTRY_CMD
+
+# Main loop
 
 _mods.py.tkinter.tk_mainloop %app
